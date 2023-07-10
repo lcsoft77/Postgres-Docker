@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes: 
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 1s
+      retries: 20
+    container_name: local_db
+    networks:
+      - postgres
+  admin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@domain.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+    ports:
+      - '80:80'
+    networks:
+      - postgres
+    volumes:
+      - .:/tmp/home
+      - pgadmin-data:/var/lib/pgadmin
+volumes:
+  postgres:
+  pgadmin-data:
+
+networks:
+  postgres:
+    name: postgres
+    driver: bridge
